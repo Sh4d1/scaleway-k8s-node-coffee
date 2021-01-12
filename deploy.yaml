@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: scaleway-k8s-node-coffee
+  name: scaleway-k8s-node-coffee
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: scaleway-k8s-node-coffee
+  namespace: scaleway-k8s-node-coffee
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: scaleway-k8s-node-coffee
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: scaleway-k8s-node-coffee
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: scaleway-k8s-node-coffee-role
+subjects:
+- kind: ServiceAccount
+  name: scaleway-k8s-node
+  namespace: scaleway-k8s-node-coffee
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scaleway-k8s-node-coffee
+  namespace: scaleway-k8s-node-coffee
+  labels:
+    control-plane: scaleway-k8s-node-coffee
+spec:
+  selector:
+    matchLabels:
+      control-plane: scaleway-k8s-node-coffee
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        control-plane: scaleway-k8s-node-coffee
+    spec:
+      serviceAccountName: scaleway-k8s-node-coffee
+      containers:
+      - env:
+        - name: CONFIGMAP_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        envFrom:
+        - secretRef:
+            name: scaleway-k8s-node-coffee
+        - configMapRef:
+            name: scaleway-k8s-node-coffee
+        image: sh4d1/scaleway-k8s-node-coffee:latest
+        name: scaleway-k8s-node-coffee
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+      terminationGracePeriodSeconds: 10
