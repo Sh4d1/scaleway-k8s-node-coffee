@@ -21,9 +21,9 @@ This is a controller that (will) do a lot of different things based on changes i
 ## Deploying
 
 ```bash
+kubectl create -f https://raw.githubusercontent.com/Sh4d1/scaleway-k8s-node-coffee/main/deploy.yaml
 kubectl create -f https://raw.githubusercontent.com/Sh4d1/scaleway-k8s-node-coffee/main/secret.yaml --edit --namespace scaleway-k8s-node-coffee
 kubectl create -f https://raw.githubusercontent.com/Sh4d1/scaleway-k8s-node-coffee/main/configmap.yaml --edit --namespace scaleway-k8s-node-coffee
-kubectl create -f https://raw.githubusercontent.com/Sh4d1/scaleway-k8s-node-coffee/main/deploy.yaml
 ```
 
 ## Contribution
