@@ -9,8 +9,26 @@ This is a controller that (will) do a lot of different things based on changes i
 ## Features
 
 ### Reserved IP
+
+This feature allows a set of predefined reserved IP to be used as the nodes IP. Once a new node appears, it will try to assign a free reserved IP out of the given list to the node.
+It is controller by the `RESERVED_IPS_POOL` environment variable, it's a list a already existing reserved IP, separated by a comma. For instance:
+```bash
+RESERVED_IPS_POOL=51.15.15.15,51.15.15.32
+```
+
 ### IP reverse
+
+This feature allows to set the reverse IP of the reserved IP to a custom one. It will only work if a reserved IP is already set on the node (to use with the Reserved IP feature).
+You just need to set the `REVERSE_IP_DOMAIN` to the wanted domain. For instance, `REVERSE_IP_DOMAIN=example.com` will update the reserved IP `51.16.17.18` with the reverse `18-17-16-51.example.com`.
+
 ### Database ACLs
+
+This feature allows to update the ACL rules of several DB to allow of all the cluster nodes (adding new ones, and removing old ones). It takes a comma separated list of ids (or regional ids). For instance:
+```
+DATABASE_IDS=11111111-1111-1111-2111-111111111111,nl-ams-1/11111111-1111-1111-2111-111111111112
+```
+
+will update the ACL of the databse with ID `11111111-1111-1111-2111-111111111111` in the region specified by the environment variable `SCW_DEFAULT_REGION` and the database `11111111-1111-1111-2111-111111111112` in the `nl-ams` region.
 
 ## TODO
 - tests
