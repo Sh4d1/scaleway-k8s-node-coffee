@@ -33,10 +33,10 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: scaleway-k8s-node-coffee-role
+  name: scaleway-k8s-node-coffee
 subjects:
 - kind: ServiceAccount
-  name: scaleway-k8s-node
+  name: scaleway-k8s-node-coffee
   namespace: scaleway-k8s-node-coffee
 ---
 apiVersion: apps/v1
