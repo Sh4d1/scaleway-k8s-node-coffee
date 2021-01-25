@@ -30,7 +30,7 @@ func (c *Controller) syncDatabaseACLs(nodeName string) error {
 
 		id, region, err := getRegionalizedID(dbID)
 		if err != nil {
-			klog.Errorf("could not get if and region from %s: %v", dbID, err)
+			klog.Errorf("could not get id and region from %s: %v", dbID, err)
 			continue
 		}
 
