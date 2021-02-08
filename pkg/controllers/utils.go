@@ -5,9 +5,10 @@ import (
 
 	instance "github.com/scaleway/scaleway-sdk-go/api/instance/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
+	"k8s.io/api/core/v1"
 )
 
-func (c *Controller) getInstanceFromNodeName(nodeName string) (*instance.Server, error) {
+func (c *NodeController) getInstanceFromNodeName(nodeName string) (*instance.Server, error) {
 	instanceAPI := instance.NewAPI(c.scwClient)
 
 	instanceResp, err := instanceAPI.ListServers(&instance.ListServersRequest{
@@ -22,7 +23,7 @@ func (c *Controller) getInstanceFromNodeName(nodeName string) (*instance.Server,
 	return instanceResp.Servers[0], nil
 }
 
-func (c *Controller) getFreeIP() (*instance.IP, error) {
+func (c *NodeController) getFreeIP() (*instance.IP, error) {
 	instanceAPI := instance.NewAPI(c.scwClient)
 
 	ipsList, err := instanceAPI.ListIPs(&instance.ListIPsRequest{}, scw.WithAllPages())
@@ -45,4 +46,8 @@ func stringInSlice(s string, slice []string) bool {
 		}
 	}
 	return false
+}
+
+func isPublicSvc(svc *v1.Service) bool {
+	return svc.Spec.Type == v1.ServiceTypeLoadBalancer || svc.Spec.Type == v1.ServiceTypeNodePort
 }

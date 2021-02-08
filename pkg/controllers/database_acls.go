@@ -10,7 +10,7 @@ import (
 	klog "k8s.io/klog/v2"
 )
 
-func (c *Controller) syncDatabaseACLs(nodeName string) error {
+func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 	if len(c.databaseIDs) == 0 {
 		return nil
 	}

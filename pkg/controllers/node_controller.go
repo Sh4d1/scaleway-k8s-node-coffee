@@ -21,9 +21,10 @@ const (
 	ReverseIPDomainEnv = "REVERSE_IP_DOMAIN"
 	DatabaseIDsEnv     = "DATABASE_IDS"
 	ReservedIPsPoolEnv = "RESERVED_IPS_POOL"
+	SecurityGroupIDs   = "SECURITY_GROUP_IDS"
 )
 
-func NewController(clientset *kubernetes.Clientset) (*Controller, error) {
+func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error) {
 	nodeListWatcher := cache.NewListWatchFromClient(clientset.CoreV1().RESTClient(), "nodes", "", fields.Everything())
 
 	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
@@ -70,7 +71,7 @@ func NewController(clientset *kubernetes.Clientset) (*Controller, error) {
 		return nil, err
 	}
 
-	controller := &Controller{
+	controller := &NodeController{
 		indexer:   indexer,
 		informer:  informer,
 		queue:     queue,
@@ -90,10 +91,14 @@ func NewController(clientset *kubernetes.Clientset) (*Controller, error) {
 		controller.reservedIPs = strings.Split(os.Getenv(ReservedIPsPoolEnv), ",")
 	}
 
+	if os.Getenv(SecurityGroupIDs) != "" {
+		controller.securityGroupIDs = strings.Split(os.Getenv(SecurityGroupIDs), ",")
+	}
+
 	return controller, nil
 }
 
-func (c *Controller) syncNeeded(nodeName string) error {
+func (c *NodeController) syncNeeded(nodeName string) error {
 	var errs []error
 
 	err := c.syncReservedIP(nodeName)
@@ -111,6 +116,11 @@ func (c *Controller) syncNeeded(nodeName string) error {
 		klog.Errorf("failed to sync database acl for node %s: %v", nodeName, err)
 		errs = append(errs, err)
 	}
+	err = c.syncSecurityGroup(nodeName)
+	if err != nil {
+		klog.Errorf("failed to sync security group for node %s: %v", nodeName, err)
+		errs = append(errs, err)
+	}
 
 	if len(errs) == 0 {
 		return nil
@@ -119,7 +129,7 @@ func (c *Controller) syncNeeded(nodeName string) error {
 	return fmt.Errorf("got several error")
 }
 
-func (c *Controller) processNextItem() bool {
+func (c *NodeController) processNextItem() bool {
 	key, quit := c.queue.Get()
 	if quit {
 		return false
@@ -131,7 +141,7 @@ func (c *Controller) processNextItem() bool {
 	return true
 }
 
-func (c *Controller) handleErr(err error, key interface{}) {
+func (c *NodeController) handleErr(err error, key interface{}) {
 	if err == nil {
 		c.queue.Forget(key)
 		return
@@ -147,7 +157,7 @@ func (c *Controller) handleErr(err error, key interface{}) {
 	klog.Infof("too many retries for key %s: %v", key, err)
 }
 
-func (c *Controller) Run(stopCh chan struct{}) {
+func (c *NodeController) Run(stopCh chan struct{}) {
 	defer runtime.HandleCrash()
 	defer c.Wg.Done()
 
@@ -165,7 +175,7 @@ func (c *Controller) Run(stopCh chan struct{}) {
 	<-stopCh
 }
 
-func (c *Controller) runWorker() {
+func (c *NodeController) runWorker() {
 	for c.processNextItem() {
 	}
 }

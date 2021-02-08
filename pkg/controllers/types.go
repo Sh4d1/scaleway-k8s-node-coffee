@@ -8,7 +8,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 )
 
-type Controller struct {
+type NodeController struct {
 	Wg sync.WaitGroup
 
 	indexer  cache.Indexer
@@ -17,9 +17,24 @@ type Controller struct {
 
 	scwClient *scw.Client
 
-	reverseIPDomain string
-	databaseIDs     []string
-	reservedIPs     []string
+	reverseIPDomain  string
+	databaseIDs      []string
+	reservedIPs      []string
+	securityGroupIDs []string
+
+	numberRetries int
+}
+
+type SvcController struct {
+	Wg sync.WaitGroup
+
+	indexer  cache.Indexer
+	queue    workqueue.RateLimitingInterface
+	informer cache.Controller
+
+	scwClient *scw.Client
+
+	securityGroupIDs []string
 
 	numberRetries int
 }

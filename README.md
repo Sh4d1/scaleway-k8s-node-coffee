@@ -11,7 +11,7 @@ This is a controller that (will) do a lot of different things based on changes i
 ### Reserved IP
 
 This feature allows a set of predefined reserved IP to be used as the nodes IP. Once a new node appears, it will try to assign a free reserved IP out of the given list to the node.
-It is controller by the `RESERVED_IPS_POOL` environment variable, it's a list a already existing reserved IP, separated by a comma. For instance:
+It is controlled by the `RESERVED_IPS_POOL` environment variable, it's a list a already existing reserved IP, separated by a comma. For instance:
 ```bash
 RESERVED_IPS_POOL=51.15.15.15,51.15.15.32
 ```
@@ -29,6 +29,15 @@ DATABASE_IDS=11111111-1111-1111-2111-111111111111,nl-ams-1/11111111-1111-1111-21
 ```
 
 will update the ACL of the databse with ID `11111111-1111-1111-2111-111111111111` in the region specified by the environment variable `SCW_DEFAULT_REGION` and the database `11111111-1111-1111-2111-111111111112` in the `nl-ams` region.
+
+### Security Group
+
+This feature allows you to update multiple security groups with:
+- The Public and Private IPs of all nodes of the cluster
+- The Node Ports of the NodePort and LoadBalancer services
+
+However due to several lack of features, the deletion of the rules if best effort for the nodes, and non existent for the services.
+It is controlled by the `SECURITY_GROUP_IDS` environment variable. It takes a comma separated list of ids (or zonale ids).
 
 ## TODO
 - tests

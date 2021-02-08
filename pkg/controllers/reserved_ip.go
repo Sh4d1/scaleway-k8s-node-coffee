@@ -5,7 +5,7 @@ import (
 	klog "k8s.io/klog/v2"
 )
 
-func (c *Controller) syncReservedIP(nodeName string) error {
+func (c *NodeController) syncReservedIP(nodeName string) error {
 	if len(c.reservedIPs) == 0 {
 		return nil
 	}

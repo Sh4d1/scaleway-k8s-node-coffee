@@ -8,7 +8,7 @@ import (
 	klog "k8s.io/klog/v2"
 )
 
-func (c *Controller) syncReverseIP(nodeName string) error {
+func (c *NodeController) syncReverseIP(nodeName string) error {
 	if c.reverseIPDomain == "" {
 		return nil
 	}

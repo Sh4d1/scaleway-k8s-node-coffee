@@ -37,20 +37,27 @@ func main() {
 		klog.Fatalf("could not build kubernetes clientset: %v", err)
 	}
 
-	controller, err := controllers.NewController(clientset)
+	nodeController, err := controllers.NewNodeController(clientset)
 	if err != nil {
-		klog.Fatalf("could not create controller: %v", err)
+		klog.Fatalf("could not create node controller: %v", err)
+	}
+	svcController, err := controllers.NewSvcController(clientset)
+	if err != nil {
+		klog.Fatalf("could not create svc controller: %v", err)
 	}
 
 	stop := make(chan struct{})
 	klog.Infof("Starting the coffee machine")
-	controller.Wg.Add(1)
-	go controller.Run(stop)
+	nodeController.Wg.Add(1)
+	go nodeController.Run(stop)
+	svcController.Wg.Add(1)
+	go svcController.Run(stop)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT|syscall.SIGTERM)
 	<-c
 	klog.Infof("Stopping the coffee machine")
-	controller.Wg.Wait()
+	nodeController.Wg.Wait()
+	svcController.Wg.Wait()
 	close(stop)
 }
