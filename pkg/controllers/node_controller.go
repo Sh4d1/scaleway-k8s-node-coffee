@@ -100,10 +100,10 @@ func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error)
 
 	if os.Getenv(NumberRetries) != "" {
 		numberRetriesValue, err := strconv.Atoi(os.Getenv(NumberRetries))
-		if err == nil {
-			controller.numberRetries = numberRetriesValue
-		} else {
-			klog.Errorf("%s should be a number", NumberRetries)
+		controller.numberRetries = numberRetriesValue
+		if err != nil {
+			klog.Errorf("could not parse the desired number of retries %s: %v", os.Getenv(NumberRetries), err)
+			controller.numberRetries = defaultNumberRetries
 		}
 	}
 
