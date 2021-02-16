@@ -8,6 +8,10 @@ import (
 	"k8s.io/client-go/util/workqueue"
 )
 
+const (
+	defaultNumberRetries = 30
+)
+
 type NodeController struct {
 	Wg sync.WaitGroup
 

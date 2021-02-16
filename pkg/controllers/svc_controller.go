@@ -48,10 +48,11 @@ func NewSvcController(clientset *kubernetes.Clientset) (*SvcController, error) {
 	}
 
 	controller := &SvcController{
-		indexer:   indexer,
-		informer:  informer,
-		queue:     queue,
-		scwClient: scwClient,
+		indexer:       indexer,
+		informer:      informer,
+		queue:         queue,
+		scwClient:     scwClient,
+		numberRetries: defaultNumberRetries,
 	}
 
 	// TODO handle validation here ?
