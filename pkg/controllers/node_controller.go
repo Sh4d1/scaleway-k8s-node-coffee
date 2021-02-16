@@ -3,11 +3,12 @@ package controllers
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/scaleway/scaleway-sdk-go/scw"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -22,6 +23,7 @@ const (
 	DatabaseIDsEnv     = "DATABASE_IDS"
 	ReservedIPsPoolEnv = "RESERVED_IPS_POOL"
 	SecurityGroupIDs   = "SECURITY_GROUP_IDS"
+	NumberRetries      = "NUMBER_RETRIES"
 )
 
 func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error) {
@@ -94,6 +96,15 @@ func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error)
 
 	if os.Getenv(SecurityGroupIDs) != "" {
 		controller.securityGroupIDs = strings.Split(os.Getenv(SecurityGroupIDs), ",")
+	}
+
+	if os.Getenv(NumberRetries) != "" {
+		numberRetriesValue, err := strconv.Atoi(os.Getenv(NumberRetries))
+		controller.numberRetries = numberRetriesValue
+		if err != nil {
+			klog.Errorf("could not parse the desired number of retries %s: %v", os.Getenv(NumberRetries), err)
+			controller.numberRetries = defaultNumberRetries
+		}
 	}
 
 	return controller, nil
