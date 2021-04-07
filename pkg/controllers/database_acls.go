@@ -3,10 +3,12 @@ package controllers
 import (
 	"fmt"
 	"net"
+	"os"
 	"strings"
 
 	rdb "github.com/scaleway/scaleway-sdk-go/api/rdb/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
+	"k8s.io/api/core/v1"
 	klog "k8s.io/klog/v2"
 )
 
@@ -17,10 +19,15 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 
 	retryOnError := false
 
-	_, exists, err := c.indexer.GetByKey(nodeName)
+	nodeObj, exists, err := c.indexer.GetByKey(nodeName)
 	if err != nil {
 		klog.Errorf("could not get node %s by key: %v", nodeName, err)
 		return err
+	}
+	node, ok := nodeObj.(*v1.Node)
+	if !ok {
+		klog.Errorf("could not get node %s from obejct", nodeName)
+		return fmt.Errorf("could not get node %s from obejct", nodeName)
 	}
 
 	dbAPI := rdb.NewAPI(c.scwClient)
@@ -74,18 +81,41 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 			continue
 		}
 
-		server, err := c.getInstanceFromNodeName(nodeName)
-		if err != nil {
-			klog.Errorf("could not get instance %s: %v", nodeName, err)
-			continue
+		var nodePublicIP net.IP
+
+		if os.Getenv(NodesIPSource) == NodesIPSourceKubernetes {
+			for _, addr := range node.Status.Addresses {
+				if addr.Type == v1.NodeExternalIP {
+					nodePublicIP = net.ParseIP(addr.Address)
+					if len(nodePublicIP) == net.IPv6len {
+						// prefer ipv4 over ipv6 since Database are only accessible via ipv4
+						continue
+					}
+					break
+				}
+			}
+		} else {
+			server, err := c.getInstanceFromNodeName(nodeName)
+			if err != nil {
+				klog.Errorf("could not get instance %s: %v", nodeName, err)
+				continue
+			}
+
+			if server.PublicIP == nil {
+				klog.Warningf("skipping node %s without public IP", nodeName)
+				continue
+			}
+
+			nodePublicIP = server.PublicIP.Address
 		}
 
-		if server.PublicIP == nil {
+		if nodePublicIP == nil {
 			klog.Warningf("skipping node %s without public IP", nodeName)
 			continue
 		}
+
 		nodeIP := net.IPNet{
-			IP:   server.PublicIP.Address,
+			IP:   nodePublicIP,
 			Mask: net.IPv4Mask(255, 255, 255, 255), // TODO better idea?
 		}
 

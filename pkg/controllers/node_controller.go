@@ -19,11 +19,13 @@ import (
 )
 
 const (
-	ReverseIPDomainEnv = "REVERSE_IP_DOMAIN"
-	DatabaseIDsEnv     = "DATABASE_IDS"
-	ReservedIPsPoolEnv = "RESERVED_IPS_POOL"
-	SecurityGroupIDs   = "SECURITY_GROUP_IDS"
-	NumberRetries      = "NUMBER_RETRIES"
+	ReverseIPDomainEnv      = "REVERSE_IP_DOMAIN"
+	DatabaseIDsEnv          = "DATABASE_IDS"
+	ReservedIPsPoolEnv      = "RESERVED_IPS_POOL"
+	SecurityGroupIDs        = "SECURITY_GROUP_IDS"
+	NumberRetries           = "NUMBER_RETRIES"
+	NodesIPSource           = "NODES_IP_SOURCE"
+	NodesIPSourceKubernetes = "kubernetes"
 )
 
 func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error) {
