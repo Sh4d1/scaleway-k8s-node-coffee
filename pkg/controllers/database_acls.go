@@ -17,6 +17,8 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 		return nil
 	}
 
+	var node *v1.Node
+
 	retryOnError := false
 
 	nodeObj, exists, err := c.indexer.GetByKey(nodeName)
@@ -24,10 +26,13 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 		klog.Errorf("could not get node %s by key: %v", nodeName, err)
 		return err
 	}
-	node, ok := nodeObj.(*v1.Node)
-	if !ok {
-		klog.Errorf("could not get node %s from obejct", nodeName)
-		return fmt.Errorf("could not get node %s from obejct", nodeName)
+	if exists {
+		var ok bool
+		node, ok = nodeObj.(*v1.Node)
+		if !ok {
+			klog.Errorf("could not get node %s from obejct", nodeName)
+			return fmt.Errorf("could not get node %s from obejct", nodeName)
+		}
 	}
 
 	dbAPI := rdb.NewAPI(c.scwClient)

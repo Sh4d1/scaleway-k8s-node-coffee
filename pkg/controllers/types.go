@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/scaleway/scaleway-sdk-go/scw"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
@@ -15,9 +16,10 @@ const (
 type NodeController struct {
 	Wg sync.WaitGroup
 
-	indexer  cache.Indexer
-	queue    workqueue.RateLimitingInterface
-	informer cache.Controller
+	clientset kubernetes.Interface
+	indexer   cache.Indexer
+	queue     workqueue.RateLimitingInterface
+	informer  cache.Controller
 
 	scwClient *scw.Client
 

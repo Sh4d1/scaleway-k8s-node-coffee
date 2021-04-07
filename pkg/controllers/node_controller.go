@@ -26,6 +26,7 @@ const (
 	NumberRetries           = "NUMBER_RETRIES"
 	NodesIPSource           = "NODES_IP_SOURCE"
 	NodesIPSourceKubernetes = "kubernetes"
+	NodeLabelReservedIP     = "reserved-ip"
 )
 
 func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error) {
@@ -81,6 +82,7 @@ func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error)
 		queue:         queue,
 		scwClient:     scwClient,
 		numberRetries: defaultNumberRetries,
+		clientset:     clientset,
 	}
 
 	// TODO handle validation here ?

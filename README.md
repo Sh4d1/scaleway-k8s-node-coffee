@@ -16,6 +16,8 @@ It is controlled by the `RESERVED_IPS_POOL` environment variable, it's a list a 
 RESERVED_IPS_POOL=51.15.15.15,51.15.15.32
 ```
 
+A label `reserved-ip: true` will be added to the nodes with a reserved IP.
+
 ### IP reverse
 
 This feature allows to set the reverse IP of the reserved IP to a custom one. It will only work if a reserved IP is already set on the node (to use with the Reserved IP feature).
