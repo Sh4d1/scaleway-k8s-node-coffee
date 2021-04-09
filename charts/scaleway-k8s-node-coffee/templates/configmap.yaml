@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "scaleway-k8s-node-coffee.fullname" . }}
+  labels:
+    {{- include "scaleway-k8s-node-coffee.labels" . | nindent 4 }}
+data:
+  REVERSE_IP_DOMAIN: {{ .Values.config.reverseIpDomain | default "" | quote }}
+  DATABASE_IDS: {{ .Values.config.databaseIds | default "" | quote }}
+  RESERVED_IPS_POOL: {{ .Values.config.reservedIpsPool | default ""| quote }}
+  SECURITY_GROUP_IDS: {{ .Values.config.securityGroupIds | default "" | quote }}
+  RETRIES_NUMBER: {{ .Values.config.retiesNumber | default "30" | quote }}

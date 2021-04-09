@@ -35,3 +35,21 @@ jobs:
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
           IMAGE_TAG: ${{ steps.tagName.outputs.tag }}
+
+  release-chart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get the version
+        id: getversion
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
+      - name: Install yq
+        run: |
+          sudo wget -O /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/4.2.0/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Change appVersion
+        run:  yq e -i '.appVersion="${{ steps.getversion.outputs.tag }}"' charts/scaleway-k8s-node-coffee/Chart.yaml
+      - name: Publish Helm charts
+        uses: stefanprodan/helm-gh-pages@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
