@@ -1,0 +1,5 @@
+** Please be patient while the chart is being deployed **
+
+To verify that scaleway-k8s-node-coffee has started, run:
+
+  kubectl --namespace={{ .Release.Namespace }} get pods -l "app.kubernetes.io/name={{ template "scaleway-k8s-node-coffee.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
