@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 
 	instance "github.com/scaleway/scaleway-sdk-go/api/instance/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
@@ -50,4 +51,16 @@ func stringInSlice(s string, slice []string) bool {
 
 func isPublicSvc(svc *v1.Service) bool {
 	return svc.Spec.Type == v1.ServiceTypeLoadBalancer || svc.Spec.Type == v1.ServiceTypeNodePort
+}
+
+func getRegionalizedID(r string) (string, string, error) {
+	split := strings.Split(r, "/")
+	switch len(split) {
+	case 1:
+		return split[0], "", nil
+	case 2:
+		return split[1], split[0], nil
+	default:
+		return "", "", fmt.Errorf("couldn't parse ID %s", r)
+	}
 }

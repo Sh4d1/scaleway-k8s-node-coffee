@@ -21,6 +21,7 @@ import (
 const (
 	ReverseIPDomainEnv      = "REVERSE_IP_DOMAIN"
 	DatabaseIDsEnv          = "DATABASE_IDS"
+	RedisIDsEnv             = "REDIS_IDS"
 	ReservedIPsPoolEnv      = "RESERVED_IPS_POOL"
 	SecurityGroupIDs        = "SECURITY_GROUP_IDS"
 	NumberRetries           = "NUMBER_RETRIES"
@@ -94,6 +95,10 @@ func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error)
 		controller.databaseIDs = strings.Split(os.Getenv(DatabaseIDsEnv), ",")
 	}
 
+	if os.Getenv(RedisIDsEnv) != "" {
+		controller.redisIDs = strings.Split(os.Getenv(RedisIDsEnv), ",")
+	}
+
 	if os.Getenv(ReservedIPsPoolEnv) != "" {
 		controller.reservedIPs = strings.Split(os.Getenv(ReservedIPsPoolEnv), ",")
 	}
@@ -130,6 +135,11 @@ func (c *NodeController) syncNeeded(nodeName string) error {
 	err = c.syncDatabaseACLs(nodeName)
 	if err != nil {
 		klog.Errorf("failed to sync database acl for node %s: %v", nodeName, err)
+		errs = append(errs, err)
+	}
+	err = c.syncRedisACLs(nodeName)
+	if err != nil {
+		klog.Errorf("failed to sync redis acl for node %s: %v", nodeName, err)
 		errs = append(errs, err)
 	}
 	err = c.syncSecurityGroup(nodeName)
