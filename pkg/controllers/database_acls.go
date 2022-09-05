@@ -91,11 +91,10 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 			for _, addr := range node.Status.Addresses {
 				if addr.Type == v1.NodeExternalIP {
 					nodePublicIP = net.ParseIP(addr.Address)
-					if len(nodePublicIP) == net.IPv6len {
+					if len(nodePublicIP) == net.IPv4len {
 						// prefer ipv4 over ipv6 since Database are only accessible via ipv4
-						continue
+						break
 					}
-					break
 				}
 			}
 		} else {
