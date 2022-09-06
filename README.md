@@ -27,12 +27,23 @@ You just need to set the `REVERSE_IP_DOMAIN` to the wanted domain. For instance,
 
 This feature allows to update the ACL rules of several DB to allow of all the cluster nodes (adding new ones, and removing old ones). It takes a comma separated list of ids (or regional ids). For instance:
 ```
-DATABASE_IDS=11111111-1111-1111-2111-111111111111,nl-ams-1/11111111-1111-1111-2111-111111111112
+DATABASE_IDS=11111111-1111-1111-2111-111111111111,nl-ams/11111111-1111-1111-2111-111111111112
 ```
 
-will update the ACL of the databse with ID `11111111-1111-1111-2111-111111111111` in the region specified by the environment variable `SCW_DEFAULT_REGION` and the database `11111111-1111-1111-2111-111111111112` in the `nl-ams` region.
+will update the ACL of the database with ID `11111111-1111-1111-2111-111111111111` in the region specified by the environment variable `SCW_DEFAULT_REGION` and the database `11111111-1111-1111-2111-111111111112` in the `nl-ams` region.
 
 If your database is in a different project than the cluster nodes, please set the environment variable `NODES_IP_SOURCE` to `kubernetes`.
+
+### Redis ACLs
+
+This feature allows to update the ACL rules of several Redis instances to allow of all the cluster nodes (adding new ones, and removing old ones). It takes a comma separated list of ids (or zonal ids). For instance:
+```
+REDIS_IDS=11111111-1111-1111-2111-111111111111,nl-ams-1/11111111-1111-1111-2111-111111111112
+```
+
+will update the ACL of the redis instance with ID `11111111-1111-1111-2111-111111111111` in the zone specified by the environment variable `SCW_DEFAULT_ZONE` and the instance `11111111-1111-1111-2111-111111111112` in the `nl-ams-1` zone.
+
+If your redis instance is in a different project than the cluster nodes, please set the environment variable `NODES_IP_SOURCE` to `kubernetes`.
 
 ### Security Group
 

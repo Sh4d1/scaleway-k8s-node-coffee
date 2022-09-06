@@ -5,14 +5,14 @@ import (
 	"net"
 	"os"
 
-	rdb "github.com/scaleway/scaleway-sdk-go/api/rdb/v1"
+	redis "github.com/scaleway/scaleway-sdk-go/api/redis/v1alpha1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 	"k8s.io/api/core/v1"
 	klog "k8s.io/klog/v2"
 )
 
-func (c *NodeController) syncDatabaseACLs(nodeName string) error {
-	if len(c.databaseIDs) == 0 {
+func (c *NodeController) syncRedisACLs(nodeName string) error {
+	if len(c.redisIDs) == 0 {
 		return nil
 	}
 
@@ -34,52 +34,42 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 		}
 	}
 
-	dbAPI := rdb.NewAPI(c.scwClient)
+	dbAPI := redis.NewAPI(c.scwClient)
 
-	for _, dbID := range c.databaseIDs {
-		klog.Infof("whitelisting IP on node %s on database %s", nodeName, dbID)
+	for _, redisID := range c.redisIDs {
+		klog.Infof("whitelisting IP on node %s on redis instance %s", nodeName, redisID)
 
-		id, region, err := getRegionalizedID(dbID)
+		id, zone, err := getRegionalizedID(redisID)
 		if err != nil {
-			klog.Errorf("could not get id and region from %s: %v", dbID, err)
+			klog.Errorf("could not get id and zone from %s: %v", redisID, err)
 			continue
 		}
 
-		dbInstance, err := dbAPI.GetInstance(&rdb.GetInstanceRequest{
-			Region:     scw.Region(region),
-			InstanceID: id,
+		dbInstance, err := dbAPI.GetCluster(&redis.GetClusterRequest{
+			Zone:      scw.Zone(zone),
+			ClusterID: id,
 		})
 		if err != nil {
-			klog.Errorf("could not get rdb instance %s: %v", id, err)
+			klog.Errorf("could not get redis instance %s: %v", id, err)
 			continue
 		}
 
-		acls, err := dbAPI.ListInstanceACLRules(&rdb.ListInstanceACLRulesRequest{
-			Region:     dbInstance.Region,
-			InstanceID: dbInstance.ID,
-		}, scw.WithAllPages())
-		if err != nil {
-			klog.Errorf("could not get rdb acl rule for instance %s: %v", id, err)
-			continue
-		}
+		var rule *redis.ACLRule
 
-		var rule *rdb.ACLRule
-
-		for _, acl := range acls.Rules {
-			if acl.Description == nodeName {
+		for _, acl := range dbInstance.ACLRules {
+			if *acl.Description == nodeName {
 				rule = acl
 				break
 			}
 		}
 
 		if !exists && rule != nil {
-			_, err := dbAPI.DeleteInstanceACLRules(&rdb.DeleteInstanceACLRulesRequest{
-				Region:     dbInstance.Region,
-				ACLRuleIPs: []string{rule.IP.String()},
-				InstanceID: dbInstance.ID,
+			err := dbAPI.DeleteACLRule(&redis.DeleteACLRuleRequest{
+				Zone:  dbInstance.Zone,
+				ACLID: rule.IP.String(),
 			})
 			if err != nil {
-				klog.Errorf("could not delete acl rule for node %s on db %s: %v", nodeName, dbInstance.ID, err)
+				klog.Errorf("could not delete acl rule for node %s on redis instance %s: %v", nodeName, dbInstance.ID, err)
 				retryOnError = true
 			}
 			continue
@@ -90,7 +80,7 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 		if os.Getenv(NodesIPSource) == NodesIPSourceKubernetes {
 			for _, addr := range node.Status.Addresses {
 				if addr.Type == v1.NodeExternalIP {
-					// prefer ipv4 over ipv6 since RDB instances are only accessible via ipv4
+					// prefer ipv4 over ipv6 since Redis instances are only accessible via ipv4
 					nodePublicIP = net.ParseIP(addr.Address).To4()
 					if nodePublicIP != nil {
 						// use first external ipv4 available
@@ -124,10 +114,10 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 		}
 
 		if rule == nil || nodeIP.String() != rule.IP.String() {
-			_, err := dbAPI.AddInstanceACLRules(&rdb.AddInstanceACLRulesRequest{
-				Region:     dbInstance.Region,
-				InstanceID: dbInstance.ID,
-				Rules: []*rdb.ACLRuleRequest{
+			_, err := dbAPI.AddACLRules(&redis.AddACLRulesRequest{
+				Zone:      dbInstance.Zone,
+				ClusterID: dbInstance.ID,
+				ACLRules: []*redis.ACLRuleSpec{
 					{
 						IP:          scw.IPNet{IPNet: nodeIP},
 						Description: nodeName,
@@ -135,7 +125,7 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 				},
 			})
 			if err != nil {
-				klog.Errorf("could not add acl rule for node %s with ip %s on db %s: %v", nodeName, nodeIP.String(), dbInstance.ID, err)
+				klog.Errorf("could not add acl rule for node %s with ip %s on redis instance %s: %v", nodeName, nodeIP.String(), dbInstance.ID, err)
 				retryOnError = true
 				continue
 			}

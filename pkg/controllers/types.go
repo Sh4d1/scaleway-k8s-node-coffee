@@ -25,6 +25,7 @@ type NodeController struct {
 
 	reverseIPDomain  string
 	databaseIDs      []string
+	redisIDs         []string
 	reservedIPs      []string
 	securityGroupIDs []string
 
