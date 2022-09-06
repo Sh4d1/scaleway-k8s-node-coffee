@@ -90,9 +90,10 @@ func (c *NodeController) syncDatabaseACLs(nodeName string) error {
 		if os.Getenv(NodesIPSource) == NodesIPSourceKubernetes {
 			for _, addr := range node.Status.Addresses {
 				if addr.Type == v1.NodeExternalIP {
-					nodePublicIP = net.ParseIP(addr.Address)
-					if len(nodePublicIP) == net.IPv4len {
-						// prefer ipv4 over ipv6 since Database are only accessible via ipv4
+					// prefer ipv4 over ipv6 since RDB instances are only accessible via ipv4
+					nodePublicIP = net.ParseIP(addr.Address).To4()
+					if nodePublicIP != nil {
+						// use first external ipv4 available
 						break
 					}
 				}
