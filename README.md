@@ -22,6 +22,7 @@ A label `reserved-ip: true` will be added to the nodes with a reserved IP.
 
 This feature allows to set the reverse IP of the reserved IP to a custom one. It will only work if a reserved IP is already set on the node (to use with the Reserved IP feature).
 You just need to set the `REVERSE_IP_DOMAIN` to the wanted domain. For instance, `REVERSE_IP_DOMAIN=example.com` will update the reserved IP `51.16.17.18` with the reverse `18-17-16-51.example.com`.
+If your domain is hosted on Scaleway, the record such as `18-17-16-51.example.com` will be added (and removed if not needed anymore).
 
 ### Database ACLs
 
