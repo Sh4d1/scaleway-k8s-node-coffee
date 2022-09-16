@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	dns "github.com/scaleway/scaleway-sdk-go/api/domain/v2beta1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -84,6 +85,8 @@ func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error)
 		scwClient:     scwClient,
 		numberRetries: defaultNumberRetries,
 		clientset:     clientset,
+		scwZoneFound:  false,
+		scwZone:       "",
 	}
 
 	// TODO handle validation here ?
@@ -113,6 +116,34 @@ func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error)
 		if err != nil {
 			klog.Errorf("could not parse the desired number of retries %s: %v", os.Getenv(NumberRetries), err)
 			controller.numberRetries = defaultNumberRetries
+		}
+	}
+	if controller.reverseIPDomain != "" {
+		// try to find a parent zone
+		maxPage := uint32(100)
+		dnsAPI := dns.NewAPI(controller.scwClient)
+		listing, err := dnsAPI.ListDNSZones(&dns.ListDNSZonesRequest{PageSize: &maxPage})
+		if err != nil {
+			klog.Errorf("could not get list of scaleway zones : %v", err)
+		} else {
+			for i := range listing.DNSZones {
+				if strings.HasSuffix(controller.reverseIPDomain, listing.DNSZones[i].Domain) {
+					subDomain := strings.TrimRight(controller.scwZone, listing.DNSZones[i].Domain)
+					if subDomain == "" || subDomain[len(subDomain)-1] == '.' {
+						zone := fmt.Sprintf("%s.%s", listing.DNSZones[i].Subdomain, listing.DNSZones[i].Domain)
+						if strings.HasPrefix(zone, ".") {
+							zone = zone[1:]
+						}
+						controller.scwZoneFound = true
+						if len(controller.scwZone) < len(zone) {
+							controller.scwZone = zone
+						}
+					}
+				}
+			}
+		}
+		if controller.scwZoneFound {
+			klog.Infof("found an scaleway zone %s", controller.scwZone)
 		}
 	}
 

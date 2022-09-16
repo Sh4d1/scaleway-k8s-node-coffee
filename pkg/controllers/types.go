@@ -24,6 +24,8 @@ type NodeController struct {
 	scwClient *scw.Client
 
 	reverseIPDomain  string
+	scwZoneFound     bool
+	scwZone          string
 	databaseIDs      []string
 	redisIDs         []string
 	reservedIPs      []string
