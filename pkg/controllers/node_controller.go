@@ -129,7 +129,7 @@ func NewNodeController(clientset *kubernetes.Clientset) (*NodeController, error)
 			for i := range listing.DNSZones {
 				if strings.HasSuffix(controller.reverseIPDomain, listing.DNSZones[i].Domain) {
 					subDomain := strings.TrimRight(controller.scwZone, listing.DNSZones[i].Domain)
-					if subDomain == "" || subDomain[len(subDomain)-1] == ',' {
+					if subDomain == "" || subDomain[len(subDomain)-1] == '.' {
 						zone := fmt.Sprintf("%s.%s", listing.DNSZones[i].Subdomain, listing.DNSZones[i].Domain)
 						if strings.HasPrefix(zone, ".") {
 							zone = zone[1:]
