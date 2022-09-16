@@ -112,14 +112,14 @@ func (c *NodeController) syncReverseIP(nodeName string) error {
 	if c.scwZoneFound {
 		comment := fmt.Sprintf("k8s node %s", nodeName)
 		_, err := dnsAPI.UpdateDNSZoneRecords(&dns.UpdateDNSZoneRecordsRequest{
-			DNSZone: c.reverseIPDomain,
+			DNSZone: c.scwZone,
 			Changes: []*dns.RecordChange{
 				&dns.RecordChange{
 					Add: &dns.RecordChangeAdd{
 						Records: []*dns.Record{
 							&dns.Record{
 								Data:    server.PublicIP.Address.String(),
-								Name:    getReversePrefix(server.PublicIP.Address),
+								Name:    fmt.Sprintf("%s.%s.", getReversePrefix(server.PublicIP.Address), c.reverseIPDomain),
 								TTL:     600,
 								Type:    "A",
 								Comment: &comment,
@@ -128,7 +128,6 @@ func (c *NodeController) syncReverseIP(nodeName string) error {
 					},
 				},
 			},
-			DisallowNewZoneCreation: true,
 		})
 		if err != nil {
 			klog.Errorf("could not update record dns for node %s: %v", nodeName, err)
