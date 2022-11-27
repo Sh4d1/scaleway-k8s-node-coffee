@@ -39,10 +39,10 @@ docker run sh4d1/scaleway-k8s-node-coffee \
 Below snippet will build and run the controller (all features enabled) locally against the given cluster (`kubeconfig`)
 
 ```bash
-# Build the image (if working on the project)
+# Run the tests and build the image (if working on the project)
 make docker-build
 
-# Build the image (quick and easy)
+# Build the image
 docker build -t sh4d1/scaleway-k8s-node-coffee .
 
 # Run it with the required environment variables
