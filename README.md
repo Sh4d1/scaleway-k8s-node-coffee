@@ -2,9 +2,7 @@
 
 # scaleway-k8s-node-coffee ☕
 
-Kubernetes toolkit controller project for Scaleway k8s nodes. Initially from [scaleway-k8s-node-coffee](https://github.com/Sh4d1/scaleway-k8s-node-coffee)
-
-This is a controller that does a lot of different things based on changes in a Kubernetes cluster (especially Kapsule).
+Kubernetes toolkit controller project for Scaleway k8s nodes, that does a lot of different things based on changes in a Kubernetes cluster (especially Kapsule).
 
 # Getting started 🚀
 
@@ -24,7 +22,7 @@ Below environment variables have to be defined in the controller container to co
 | `DATABASE_IDS`       | List of DBaaS IDs (with optional regional IDs), comma-separated                                                                                                                                                                       | `11111111-1111-1111-2111-111111111111,nl-ams/11111111-1111-1111-2111-111111111112`   |
 | `REDIS_IDS`          | List of Redis IDs (with optional zonal IDs), comma-separated                                                                                                                                                                          | `11111111-1111-1111-2111-111111111111,nl-ams-1/11111111-1111-1111-2111-111111111112` |
 | `SECURITY_GROUP_IDS` | List of security group IDs (with optional zonal IDs), comma-separated                                                                                                                                                                 | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`                                               |
-| `RETRIES_NUMBER`     | *optional*. Retries on error amount (default: `30`)                                                                                                                                                                                   | `15`                                                                                 |
+| `NUMBER_RETRIES`     | *optional*. Retries on error amount (default: `30`)                                                                                                                                                                                   | `15`                                                                                 |
 ## Local tests
 
 You can test it against a remote cluster by providing the corresponding `KUBECONFIG` environment variable to the container, like the following :
