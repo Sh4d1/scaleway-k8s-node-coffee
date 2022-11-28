@@ -29,6 +29,10 @@ fmt:
 vet:
 	go vet ./...
 
+# Deploy the controller
+deploy:
+	kubectl apply -f ./deploy -n scaleway-k8s-node-coffee
+
 # Build the docker image
 docker-build: test
 	docker build --platform=linux/$(ARCH) -f Dockerfile . -t ${FULL_IMG}
