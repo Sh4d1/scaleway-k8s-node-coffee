@@ -25,7 +25,7 @@ const (
 	RedisIDsEnv             = "REDIS_IDS"
 	ReservedIPsPoolEnv      = "RESERVED_IPS_POOL"
 	SecurityGroupIDs        = "SECURITY_GROUP_IDS"
-	NumberRetries           = "RETRIES_NUMBER"
+	NumberRetries           = "NUMBER_RETRIES"
 	NodesIPSource           = "NODES_IP_SOURCE"
 	NodesIPSourceKubernetes = "kubernetes"
 	NodeLabelReservedIP     = "reserved-ip"
