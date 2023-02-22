@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	redis "github.com/scaleway/scaleway-sdk-go/api/redis/v1alpha1"
+	redis "github.com/scaleway/scaleway-sdk-go/api/redis/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 	"k8s.io/api/core/v1"
 	klog "k8s.io/klog/v2"
@@ -64,9 +64,9 @@ func (c *NodeController) syncRedisACLs(nodeName string) error {
 		}
 
 		if !exists && rule != nil {
-			err := dbAPI.DeleteACLRule(&redis.DeleteACLRuleRequest{
+			_, err := dbAPI.DeleteACLRule(&redis.DeleteACLRuleRequest{
 				Zone:  dbInstance.Zone,
-				ACLID: rule.IP.String(),
+				ACLID: rule.ID,
 			})
 			if err != nil {
 				klog.Errorf("could not delete acl rule for node %s on redis instance %s: %v", nodeName, dbInstance.ID, err)
@@ -113,13 +113,13 @@ func (c *NodeController) syncRedisACLs(nodeName string) error {
 			Mask: net.IPv4Mask(255, 255, 255, 255), // TODO better idea?
 		}
 
-		if rule == nil || nodeIP.String() != rule.IP.String() {
+		if rule == nil || nodeIP.String() != rule.IPCidr.String() {
 			_, err := dbAPI.AddACLRules(&redis.AddACLRulesRequest{
 				Zone:      dbInstance.Zone,
 				ClusterID: dbInstance.ID,
 				ACLRules: []*redis.ACLRuleSpec{
 					{
-						IP:          scw.IPNet{IPNet: nodeIP},
+						IPCidr:      scw.IPNet{IPNet: nodeIP},
 						Description: nodeName,
 					},
 				},
